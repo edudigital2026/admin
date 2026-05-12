@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/api/switch", "destination": "/api/switch.js" }
+  ]
+}
