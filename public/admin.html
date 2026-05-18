@@ -402,6 +402,27 @@
     padding: 8px 12px; font-size: .88rem;
   }
 
+  /* ── CONFIGURAÇÕES ── */
+  .config-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .config-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem; font-weight: 700;
+    margin-bottom: 18px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .config-card h3 span { color: var(--accent); font-style: italic; }
+  .config-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+  }
+
   @media (max-width: 600px) {
     .switch-card { flex-direction: column; align-items: flex-start; }
     .admin-header { flex-direction: column; align-items: flex-start; }
@@ -453,6 +474,33 @@
     <div class="switch-btns">
       <button class="btn btn-green" onclick="setEsperaGlobal(true)">🔓 Abrir espera</button>
       <button class="btn btn-red"   onclick="setEsperaGlobal(false)">🔒 Fechar espera</button>
+    </div>
+  </div>
+
+  <!-- CONFIGURAÇÕES DE DATAS -->
+  <div class="config-card">
+    <h3>Configurações do <span>Semestre</span></h3>
+    <div class="config-grid">
+      <div class="field">
+        <label>Data do evento</label>
+        <input type="text" id="cfgDataEvento" placeholder="30/06/2026">
+      </div>
+      <div class="field">
+        <label>Início 2ª e 4ª feira</label>
+        <input type="text" id="cfgData24" placeholder="03/08/2026">
+      </div>
+      <div class="field">
+        <label>Início 3ª e 5ª feira</label>
+        <input type="text" id="cfgData35" placeholder="04/08/2026">
+      </div>
+      <div class="field">
+        <label>Semestre</label>
+        <input type="text" id="cfgSemestre" placeholder="II Semestre 2026">
+      </div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:10px;align-items:center;">
+      <button class="btn btn-accent btn-sm" onclick="salvarConfigs()">Salvar configurações</button>
+      <div class="msg" id="configMsg" style="margin:0;flex:1;"></div>
     </div>
   </div>
 
@@ -606,6 +654,13 @@ async function carregarTudo() {
     polosStatus   = d.polosStatus || {};
     enderecos     = d.enderecos   || {};
     const nomes   = d.nomes       || {};
+    const configs = d.configs     || {};
+
+    // Preenche campos de configuração
+    if (configs.dataEvento) document.getElementById('cfgDataEvento').value = configs.dataEvento;
+    if (configs.data24)     document.getElementById('cfgData24').value     = configs.data24;
+    if (configs.data35)     document.getElementById('cfgData35').value     = configs.data35;
+    if (configs.semestre)   document.getElementById('cfgSemestre').value   = configs.semestre;
 
     // Monta POLOS dinamicamente do Edge Config — usa polosStatus como fonte de verdade
     const idsPolos = Object.keys(d.polosStatus || {});
@@ -1023,6 +1078,27 @@ async function setEsperaGlobal(aberta) {
   if (d.success) {
     atualizarEsperaGlobal(aberta);
     mostrarMsg('switchMsg', aberta ? '🔓 Lista de espera aberta!' : '🔒 Lista de espera fechada!', 'ok');
+  }
+}
+
+// ── CONFIGURAÇÕES ─────────────────────────────────────────
+async function salvarConfigs() {
+  const configs = {
+    dataEvento: document.getElementById('cfgDataEvento').value.trim(),
+    data24:     document.getElementById('cfgData24').value.trim(),
+    data35:     document.getElementById('cfgData35').value.trim(),
+    semestre:   document.getElementById('cfgSemestre').value.trim(),
+  };
+  try {
+    const r = await fetch('/api/switch', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ senha, configs })
+    });
+    const d = await r.json();
+    if (d.success) mostrarMsg('configMsg', '✓ Configurações salvas!', 'ok');
+    else mostrarMsg('configMsg', d.error || 'Erro', 'err');
+  } catch(e) {
+    mostrarMsg('configMsg', 'Erro de conexão', 'err');
   }
 }
 

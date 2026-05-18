@@ -421,6 +421,11 @@ async function carregarPolos() {
     const polos     = d.polosStatus || {};
     const enderecos = d.enderecos   || {};
     const nomes     = d.nomes       || {};
+    const configs   = d.configs     || {};
+
+    // Atualiza datas do Edge Config
+    if (configs.data24) document.getElementById('data24').textContent = configs.data24;
+    if (configs.data35) document.getElementById('data35').textContent = configs.data35;
 
     // Usa polosStatus como fonte de verdade — evita polos fantasma
     const ids = Object.keys(polos);
