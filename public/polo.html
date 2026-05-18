@@ -1164,7 +1164,7 @@
   <main>
     <!-- TÍTULO + BALÃO DE DATAS -->
     <div class="inscricoes-header">
-      <h2 class="inscricoes-title">Inscrições <span>2026</span></h2>
+      <h2 class="inscricoes-title" id="tituloInscricoes">Inscrições <span>2026</span></h2>
     </div>
 
     <div class="datas-balao">
@@ -1391,8 +1391,17 @@ document.addEventListener('DOMContentLoaded', () => {
       if (sideEnd)  sideEnd.textContent  = endereco;
       document.title = `${nome} · FIEC Educação Digital`;
 
-      // Atualiza datas do Edge Config
+      // Atualiza datas e título do Edge Config
       const configs = data.configs || {};
+      if (configs.titulo) {
+        const el = document.getElementById('tituloInscricoes');
+        if (el) {
+          const partes = configs.titulo.split(' ');
+          const ano = partes[partes.length - 1];
+          const resto = partes.slice(0, -1).join(' ');
+          el.innerHTML = `${resto} <span>${ano}</span>`;
+        }
+      }
       if (configs.data24) { const el = document.getElementById('data24'); if(el) el.textContent = configs.data24; }
       if (configs.data35) { const el = document.getElementById('data35'); if(el) el.textContent = configs.data35; }
 

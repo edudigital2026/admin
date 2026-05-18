@@ -482,6 +482,10 @@
     <h3>Configurações do <span>Semestre</span></h3>
     <div class="config-grid">
       <div class="field">
+        <label>Título das inscrições</label>
+        <input type="text" id="cfgTitulo" placeholder="Inscrições 2026">
+      </div>
+      <div class="field">
         <label>Data do evento</label>
         <input type="text" id="cfgDataEvento" placeholder="30/06/2026">
       </div>
@@ -657,6 +661,7 @@ async function carregarTudo() {
     const configs = d.configs     || {};
 
     // Preenche campos de configuração
+    if (configs.titulo)     document.getElementById('cfgTitulo').value     = configs.titulo;
     if (configs.dataEvento) document.getElementById('cfgDataEvento').value = configs.dataEvento;
     if (configs.data24)     document.getElementById('cfgData24').value     = configs.data24;
     if (configs.data35)     document.getElementById('cfgData35').value     = configs.data35;
@@ -1084,6 +1089,7 @@ async function setEsperaGlobal(aberta) {
 // ── CONFIGURAÇÕES ─────────────────────────────────────────
 async function salvarConfigs() {
   const configs = {
+    titulo:     document.getElementById('cfgTitulo').value.trim(),
     dataEvento: document.getElementById('cfgDataEvento').value.trim(),
     data24:     document.getElementById('cfgData24').value.trim(),
     data35:     document.getElementById('cfgData35').value.trim(),
