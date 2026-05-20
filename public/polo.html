@@ -1227,6 +1227,22 @@ function liberarGeral() {
   });
 }
 
+function bloquearEspera() {
+  document.querySelectorAll('.espera-sidebar-btn, .espera-btn').forEach(btn => {
+    btn.style.opacity = '0.4';
+    btn.style.cursor  = 'not-allowed';
+    btn.style.pointerEvents = 'none';
+  });
+}
+
+function liberarEspera() {
+  document.querySelectorAll('.espera-sidebar-btn, .espera-btn').forEach(btn => {
+    btn.style.opacity = '';
+    btn.style.cursor  = '';
+    btn.style.pointerEvents = '';
+  });
+}
+
 // ── FECHAR UM CARD (igual vagas esgotadas) ────────────────
 function fecharCard(btn, bloqueioGeral = false) {
   const form = btn.dataset.form;
@@ -1318,18 +1334,27 @@ function aplicarStatus(data) {
   // 1. Switch geral fechado → fecha tudo
   if (!data.aberto) {
     bloquearGeral();
+    bloquearEspera();
     return;
   }
 
   // 2. Polo fechado → fecha tudo
   if (data.poloAberto === false) {
     bloquearGeral();
+    bloquearEspera();
     return;
   }
 
   liberarGeral();
 
-  // 3. Aplica status individual de cada turma
+  // 3. Lista de espera global
+  if (data.esperaGlobal === false) {
+    bloquearEspera();
+  } else {
+    liberarEspera();
+  }
+
+  // 4. Aplica status individual de cada turma
   document.querySelectorAll('.modulo-btn').forEach(btn => {
     const aberta = btn.dataset.aberta !== 'false';
     if (aberta) {
