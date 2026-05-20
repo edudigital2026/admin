@@ -145,7 +145,7 @@ export default async function handler(req, res) {
     }
 
     // Salvar configurações do semestre
-    if (body.configs) {
+    if (body.configs !== undefined) {
       const ok = await ecSet([{ operation: 'upsert', key: 'configs', value: body.configs }]);
       return res.status(ok ? 200 : 500).json({ success: ok });
     }
