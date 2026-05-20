@@ -4,6 +4,25 @@ Programa de Educação Digital · II Semestre 2026
 
 ---
 
+## Índice
+
+- [Visão Geral](#visão-geral)
+- [URLs Importantes](#urls-importantes)
+- [Estrutura do Repositório](#estrutura-do-repositório)
+- [Edge Config — Estrutura dos Dados](#edge-config--estrutura-dos-dados)
+- [Painel Admin — O que cada coisa faz](#painel-admin--o-que-cada-coisa-faz)
+- [Google Apps Script](#google-apps-script)
+- [Variáveis de Ambiente](#variáveis-de-ambiente-vercel)
+- [IDs dos Polos](#ids-dos-polos)
+- [Como Adicionar um Polo Novo](#como-adicionar-um-polo-novo)
+- [Como o Google Sites está configurado](#como-o-google-sites-está-configurado)
+- [Fluxo de Inscrição](#fluxo-de-inscrição)
+- [Configuração do Zero](#configuração-do-zero-novo-github--novo-vercel)
+- [Checklist para o Dia das Inscrições](#checklist-para-o-dia-das-inscrições)
+- [Problemas e Soluções](#problemas-e-soluções)
+
+---
+
 ## Visão Geral
 
 O sistema gerencia as inscrições dos polos da FIEC através de três camadas:
@@ -27,7 +46,9 @@ O sistema gerencia as inscrições dos polos da FIEC através de três camadas:
 
 ---
 
-## Estrutura do Repositório (GitHub: Razante21/switch)
+## Estrutura do Repositório
+
+**GitHub:** `https://github.com/edudigital2026/admin`
 
 ```
 /
@@ -37,6 +58,8 @@ O sistema gerencia as inscrições dos polos da FIEC através de três camadas:
 ├── public/
 │   ├── index.html     ← Página de login do admin
 │   ├── admin.html     ← Painel de controle
+│   ├── admin.css      ← Estilo do painel admin
+│   ├── admin.js       ← Lógica do painel admin
 │   ├── polo.html      ← Template genérico dos polos
 │   └── inicio.html    ← Página inicial com cards dos polos
 └── vercel.json
@@ -46,8 +69,6 @@ O sistema gerencia as inscrições dos polos da FIEC através de três camadas:
 
 ## Edge Config — Estrutura dos Dados
 
-O Edge Config armazena tudo em chaves JSON:
-
 | Chave | O que guarda |
 |---|---|
 | `inscricoes` | `"ABERTO"` ou `"FECHADO"` — switch geral |
@@ -56,50 +77,72 @@ O Edge Config armazena tudo em chaves JSON:
 | `nomes` | `{ "polo-fiec": "Polo FIEC" }` |
 | `enderecos` | `{ "polo-fiec": "Av. Eng. Fábio..." }` |
 | `esperaGlobal` | `true/false` — lista de espera aberta ou não |
+| `configs` | `{ titulo, eyebrow, data24, data35, semestre, linkEspera }` |
 
 ---
 
 ## Painel Admin — O que cada coisa faz
 
-### Switch Geral
-- **Abrir inscrições** → abre todos os polos de uma vez
-- **Fechar inscrições** → fecha todos os polos de uma vez
+### Visão Geral
+- **Abrir/Fechar inscrições** → abre ou fecha todos os polos de uma vez
+- **Abrir/Fechar lista de espera** → libera ou bloqueia o botão de lista de espera em todos os polos
 
-### Lista de Espera Global
-- **Abrir espera** → libera o link de lista de espera em todos os polos
-- **Fechar espera** → bloqueia o link de lista de espera
-
-### Cards dos Polos
-- **🔓 Aberto / 🔒 Fechado** → abre ou fecha inscrições só daquele polo
-- **Turmas** → abre modal com as turmas do polo
+### Polos e Turmas
+- **🔓/🔒** no card do polo → abre ou fecha aquele polo individualmente
+- **Turmas** → abre modal com as turmas cadastradas
+- **📍** no modal → edita nome e endereço do polo
+- **+ Turma** → adiciona nova turma com módulo, dias, horário e link do Forms
+- **🔓/🔒** na turma → abre ou fecha aquela turma individualmente
+- **✎** → edita turma
+- **🗑** → remove turma
 - **🔗 URL** → copia a URL do polo para colar no Google Sites
 - **🗑 Deletar** → remove o polo permanentemente
 
-### Modal de Turmas
-- **📍** → edita nome e endereço do polo
-- **+ Turma** → adiciona nova turma
-- **🔓/🔒** em cada turma → abre ou fecha aquela turma individualmente
-- **✎** → edita turma
-- **🗑** → remove turma
+### Configurações
+Campos editáveis que atualizam automaticamente no site público:
+- **Título das inscrições** — ex: "Inscrições 2026"
+- **Cabeçalho** — ex: "Programa de Educação Digital · 2026"
+- **Data do evento**
+- **Início 2ª e 4ª feira**
+- **Início 3ª e 5ª feira**
+- **Semestre**
+- **Link da Lista de Espera** — URL do Google Forms de lista de espera
 
-### Backup e Restaurar
-- **↑ Fazer backup agora** → envia o estado atual para a planilha master (aba Turmas e aba Polos)
+### Backup
+- **↑ Fazer backup agora** → envia o estado atual para a planilha master
 - **↓ Restaurar emergência** → SOMENTE em emergência — sobrescreve o Edge Config com os dados da planilha
 
 ---
 
-## Google Apps Script — Planilha Master
+## Google Apps Script
 
-URL: `https://script.google.com/macros/s/AKfycbwantxjG5yYVHNgWT_X7QUv7JdNfTCJfKC7rG_ohukGOpEOqKSriqgcgpxnSagIbxassQ/exec`
+### Planilha Master
+**URL:** `https://script.google.com/macros/s/AKfycbwantxjG5yYVHNgWT_X7QUv7JdNfTCJfKC7rG_ohukGOpEOqKSriqgcgpxnSagIbxassQ/exec`
 
-A planilha tem três abas:
+Abas da planilha master:
 
 | Aba | O que guarda |
 |---|---|
 | `Turmas` | Backup de todas as turmas de todos os polos |
 | `Polos` | Backup dos polos com ID, nome e endereço |
 | `ListaEspera` | Inscrições na lista de espera |
-| `Config` | Configurações gerais |
+
+### Script das Planilhas de Respostas
+Arquivo: `script-planilha.js`
+
+Cole em **cada planilha** vinculada ao Google Forms:
+1. Abre a planilha → **Extensões → Apps Script**
+2. Cola o código do arquivo `script-planilha.js`
+3. Salva (Ctrl+S)
+4. Vai em **Acionadores → Adicionar acionador**:
+   - Função: `formatarEVerificarTudo`
+   - Origem: Da planilha
+   - Tipo de evento: Ao enviar formulário
+5. Clica em Salvar
+
+O que o script faz:
+- Formata o nome do aluno em MAIÚSCULO automaticamente
+- Pinta a linha de vermelho se o aluno tiver menos de 12 anos
 
 ---
 
@@ -146,7 +189,7 @@ Configuradas em **Settings → Environment Variables** do projeto:
 
 ## Como o Google Sites está configurado
 
-Cada página de polo no Sites incorpora um iframe apontando para:
+Cada página de polo incorpora um iframe apontando para:
 ```
 https://admin-fiec.vercel.app/polo.html?id=POLO_ID
 ```
@@ -161,163 +204,174 @@ https://admin-fiec.vercel.app/inicio.html
 ## Fluxo de Inscrição
 
 1. Aluno acessa o Google Sites
-2. Vê a página inicial com os cards dos polos (`inicio.html`)
+2. Vê a página inicial com os cards dos polos
 3. Clica em um polo → abre `polo.html?id=polo-X`
 4. O polo busca turmas e status do Edge Config via API
 5. Se inscrições abertas → clica na turma → redireciona para o Google Forms
 6. Formulário salva na planilha do polo
-7. Apps Script formata o nome e verifica idade
-
----
-
-*Desenvolvido por Pedro Santos (Razante21) · FIEC Indaiatuba · 2026*
+7. Apps Script formata o nome e verifica idade automaticamente
 
 ---
 
 ## Configuração do Zero (novo GitHub + novo Vercel)
 
-Se precisar reconfigurar tudo em uma conta nova, siga esse passo a passo.
-
 ### 1. GitHub — Criar o repositório
+1. Acessa [github.com](https://github.com) e faz login
+2. Clica em **New repository** → nome `switch` → **Private** → **Create**
+3. Faz upload de todos os arquivos na estrutura correta
 
-1. Acessa [github.com](https://github.com) e faz login na conta da FIEC
-2. Clica em **New repository**
-3. Nome: `switch` (ou qualquer nome)
-4. Deixa como **Private**
-5. Clica em **Create repository**
-6. Faz upload de todos os arquivos na estrutura correta:
-```
-api/switch.js
-api/restore.js
-public/index.html
-public/admin.html
-public/polo.html
-public/inicio.html
-vercel.json
-package.json
-```
-
----
-
-### 2. Vercel — Criar a conta e o projeto
-
-1. Acessa [vercel.com](https://vercel.com) e cria conta com o GitHub da FIEC
-2. Clica em **Add New → Project**
-3. Seleciona o repositório `switch` criado no passo anterior
-4. Clica em **Deploy** (não muda nada nas configurações por enquanto)
-5. Aguarda o deploy terminar
-6. O Vercel vai criar uma URL automática tipo `switch-xxx.vercel.app`
-
----
+### 2. Vercel — Criar o projeto
+1. Acessa [vercel.com](https://vercel.com) → **Add New → Project**
+2. Seleciona o repositório `switch`
+3. Clica em **Deploy**
 
 ### 3. Vercel — Criar o Edge Config
+1. **Storage → Create → Edge Config** → nome `fiec-switch` → **Create**
+2. Clica em **Projects → Connect** → seleciona o projeto → marca os 3 ambientes → **Connect**
+3. Anota o **ID** (`ecfg_...`) e vai em **Tokens → Create Token** para pegar o token de leitura
 
-1. No painel do Vercel, vai em **Storage → Create → Edge Config**
-2. Nome: `fiec-switch`
-3. Clica em **Create**
-4. Após criar, clica em **Projects** no menu lateral
-5. Seleciona o projeto `switch` e clica em **Connect**
-6. Marca os 3 ambientes (Development, Preview, Production) e clica em **Connect**
-7. Vai em **Items** e adiciona manualmente o item inicial:
-   - Chave: `inscricoes`
-   - Valor: `ABERTO`
-8. Anota o **ID** do Edge Config (começa com `ecfg_`) — vai usar em breve
-9. Clica em **Tokens → Create Token** e anota o token gerado
+### 4. Vercel — Token da API
+1. Avatar → **Account Settings → Tokens → Create Token**
+2. Nome: `fiec-admin` → **Create** → copia o token
 
----
-
-### 4. Vercel — Criar o Token da API
-
-1. Clica no avatar no canto superior direito → **Account Settings**
-2. Vai em **Tokens → Create Token**
-3. Nome: `fiec-admin`
-4. Clica em **Create** e anota o token gerado
-
----
-
-### 5. Vercel — Configurar as Variáveis de Ambiente
-
-1. No projeto `switch`, vai em **Settings → Environment Variables**
-2. Adiciona cada variável abaixo:
+### 5. Vercel — Variáveis de Ambiente
+Em **Settings → Environment Variables** do projeto, adiciona:
 
 | Nome | Valor |
 |---|---|
-| `EDGE_CONFIG` | `https://edge-config.vercel.com/ecfg_SEU_ID?token=SEU_TOKEN_LEITURA` |
-| `EDGE_CONFIG_ID` | `ecfg_SEU_ID` (o ID do passo 3) |
-| `EDGE_CONFIG_TOKEN` | O token de leitura do passo 3 |
-| `VERCEL_TOKEN` | O token da API do passo 4 |
-| `SENHA_PAINEL` | A senha que quiser para acessar o admin |
-| `APPS_SCRIPT_MASTER_URL` | A URL do Apps Script master (passo 7) |
+| `EDGE_CONFIG` | `https://edge-config.vercel.com/ecfg_ID?token=TOKEN` |
+| `EDGE_CONFIG_ID` | `ecfg_SEU_ID` |
+| `EDGE_CONFIG_TOKEN` | token de leitura |
+| `VERCEL_TOKEN` | token da API |
+| `SENHA_PAINEL` | senha que quiser |
+| `APPS_SCRIPT_MASTER_URL` | URL do Apps Script master |
 
-3. Após adicionar todas as variáveis, vai em **Deployments** e faz **Redeploy** do último deploy
+Após adicionar, faz **Redeploy** do último deploy.
 
----
+### 6. Domínio personalizado (opcional)
+**Settings → Domains → Add Domain** → digita o domínio desejado
 
-### 6. Vercel — Configurar Domínio Personalizado (opcional)
+### 7. Apps Script Master
+1. Abre a planilha master → **Extensões → Apps Script**
+2. Cola o código do `apps-script-master.js`
+3. Salva (Ctrl+S) — **não precisa reimplantar**
+4. Vai em **Implantar → Nova implantação → App da Web → Acesso: Qualquer pessoa**
+5. Copia a URL e coloca na variável `APPS_SCRIPT_MASTER_URL` do Vercel
 
-Se quiser manter a URL `admin-fiec.vercel.app`:
-1. Vai em **Settings → Domains**
-2. Clica em **Add Domain**
-3. Digite `admin-fiec.vercel.app`
-4. O Vercel vai configurar automaticamente
-
-Se a URL mudar e os HTMLs dos polos no Google Sites estiverem com a URL antiga:
-1. Baixa os arquivos `polo.html` e `inicio.html` do repositório
-2. Substitui todas as ocorrências da URL antiga pela nova
-3. Faz upload dos arquivos atualizados no GitHub
-
----
-
-### 7. Google Apps Script — Configurar a Planilha Master
-
-1. Abre a planilha master no Google Sheets
-2. Vai em **Extensões → Apps Script**
-3. Cola o conteúdo do arquivo `apps-script-master.js`
-4. Salva (Ctrl+S) — **não precisa reimplantar**
-5. Vai em **Implantar → Nova implantação**
-6. Tipo: **App da Web**
-7. Acesso: **Qualquer pessoa**
-8. Clica em **Implantar** e copia a URL gerada
-9. Adiciona essa URL na variável `APPS_SCRIPT_MASTER_URL` no Vercel (passo 5)
-
----
-
-### 8. Verificar se está funcionando
-
+### 8. Verificar
 1. Acessa `https://SEU-DOMINIO.vercel.app/index.html`
-2. Faz login com a senha configurada
-3. Deve aparecer o painel com os polos
-4. Se aparecer vazio, clica em **↓ Restaurar emergência** para carregar os dados da planilha
-5. Clica em **↑ Fazer backup agora** para confirmar
-
----
+2. Faz login → deve aparecer o painel
+3. Se vazio → clica em **↓ Restaurar emergência**
+4. Clica em **↑ Fazer backup agora**
 
 ### 9. Atualizar o Google Sites
+Para cada polo, substitui a URL no iframe:
+```
+https://SEU-DOMINIO.vercel.app/polo.html?id=polo-fiec
+```
+Para a página inicial:
+```
+https://SEU-DOMINIO.vercel.app/inicio.html
+```
 
-Para cada polo no Google Sites:
-1. Edita a página do polo
-2. Clica no bloco de incorporação (iframe)
-3. Substitui a URL pela nova:
-   ```
-   https://SEU-DOMINIO.vercel.app/polo.html?id=polo-fiec
-   ```
-4. Para a página inicial:
-   ```
-   https://SEU-DOMINIO.vercel.app/inicio.html
-   ```
+### Se a URL mudar
+Arquivos que precisam ser atualizados com a nova URL:
+- `public/polo.html` → linha `const VERCEL_URL`
+- `public/inicio.html` → linha `const VERCEL_URL`
+- `public/admin.js` → linha `const API` e função `copiarUrl`
+- Google Sites → URL de cada iframe
 
 ---
 
-### Se a URL do Vercel mudar
+## Checklist para o Dia das Inscrições
 
-Todos os arquivos que precisam ser atualizados com a nova URL:
+**Antes de abrir:**
+- [ ] Todas as turmas têm o link do Google Forms preenchido
+- [ ] Os Forms estão aceitando respostas
+- [ ] Clicar em **↑ Fazer backup agora**
+- [ ] Testar um polo abrindo a URL diretamente
+- [ ] Abrir as inscrições no admin
 
-**No repositório GitHub:**
-- `public/polo.html` — linha com `const VERCEL_URL = '...'`
-- `public/inicio.html` — linha com `const VERCEL_URL = '...'`
-- `public/admin.html` — linha com `const API = '...'` e na função `copiarUrl`
+**Para fechar:**
+- [ ] Clicar em **✕ Fechar inscrições**
+- [ ] Confirmar que os polos estão bloqueados em outro dispositivo
+- [ ] Clicar em **↑ Fazer backup agora**
 
-**No Google Sites:**
-- URL de cada polo incorporado
-- URL da página inicial incorporada
+---
 
+## Problemas e Soluções
+
+### 🔴 Polos sumiram do admin após F5
+**Causa:** Polo criado mas `polosStatus` não foi salvo.
+**Solução:** Clica em **↓ Restaurar emergência** — os polos voltam da planilha.
+
+---
+
+### 🔴 Edge Config perdeu todos os dados
+**Causa:** Edge Config sobrescrito acidentalmente.
+**Solução:**
+1. Abre o painel admin → clica em **↓ Restaurar emergência**
+2. Confirma → aguarda sucesso
+3. Clica em **↑ Fazer backup agora**
+
+Se o restaurar também falhar, verifica se `APPS_SCRIPT_MASTER_URL` está correto no Vercel.
+
+---
+
+### 🟡 Polo mostra "Erro ao carregar turmas"
+**Causa 1:** API do Vercel fora do ar → aguarda alguns minutos.
+**Causa 2:** Edge Config vazio → faz o restaurar emergência.
+**Causa 3:** Polo deletado → recria no admin com o mesmo ID.
+
+---
+
+### 🟡 Admin não carrega / botões não funcionam
+**Causa:** Erro de JavaScript no `admin.html`.
+**Solução:**
+1. Abre o console (F12 → Console) e anota o erro
+2. Limpa o localStorage: `localStorage.clear()` no console
+3. Recarrega e faz login novamente
+
+---
+
+### 🟡 Inscrições abertas mas aluno não consegue clicar
+**Causa 1:** Polling de 30s ainda não atualizou → aguarda ou recarrega.
+**Causa 2:** Polo específico está fechado → verifica no admin se o polo está **🔓 Aberto**.
+**Causa 3:** Turma específica está fechada → abre o modal e verifica as turmas.
+
+---
+
+### 🟡 Deploy do Vercel travado
+**Causa:** Fila do Vercel sobrecarregada.
+**Solução:**
+1. Cancela todos os deploys pendentes no Vercel
+2. **Deployments → 3 pontinhos → Redeploy**
+3. Ou faz uma alteração mínima no GitHub para forçar novo deploy
+
+---
+
+### 🟢 Polo mostra ID em vez do nome
+**Causa:** Nome não salvo no Edge Config.
+**Solução:** No admin → **Turmas** → **📍** → preenche nome e endereço → salva.
+
+---
+
+### 🟢 URL do polo retorna 404
+**Causa:** URL com `/public/` na frente.
+**Solução:** A URL correta é `https://admin-fiec.vercel.app/polo.html?id=POLO_ID` — sem `/public/`.
+
+---
+
+### 🟢 Backup não atualiza aba Polos
+**Causa:** Apps Script master desatualizado.
+**Solução:** Verifica se existe `if (dados.tipo === 'backupPolos')` no código. Se não, cola o `apps-script-master.js` atualizado e salva.
+
+---
+
+### 🟢 Restaurar emergência remove polos recentes
+**Causa:** Backup não feito após criar os polos.
+**Solução:** Recria os polos manualmente no admin e faz backup imediatamente.
+
+---
+
+*Desenvolvido por Pedro Santos (Razante21) · FIEC Indaiatuba · 2026*
